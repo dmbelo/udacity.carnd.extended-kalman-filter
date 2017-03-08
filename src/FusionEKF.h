@@ -8,7 +8,10 @@
 #include "kalman_filter.h"
 #include "tools.h"
 
-class FusionEKF {
+using Eigen::MatrixXd;
+
+class FusionEKF
+{
 public:
   /**
   * Constructor.

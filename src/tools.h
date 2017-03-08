@@ -3,6 +3,9 @@
 #include <vector>
 #include "Eigen/Dense"
 
+using namespace std;
+using namespace Eigen;
+
 class Tools {
 public:
   /**
