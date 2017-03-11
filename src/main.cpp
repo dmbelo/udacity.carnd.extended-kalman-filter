@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
       // LASER MEASUREMENT
 
       // read measurements at this timestamp
-      meas_package.sensor_type_ = MeasurementPackage::LASER;
+      meas_package.sensor_type_ = MeasurementPackage::LASER; // TODO How does this work?
       meas_package.raw_measurements_ = VectorXd(2);
       float x;
       float y;
