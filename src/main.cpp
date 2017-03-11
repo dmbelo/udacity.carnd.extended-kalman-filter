@@ -9,9 +9,7 @@
 #include "measurement_package.h"
 
 using namespace std;
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
-using std::vector;
+using namespace Eigen;
 
 void check_arguments(int argc, char* argv[]) {
   string usage_instructions = "Usage instructions: ";
