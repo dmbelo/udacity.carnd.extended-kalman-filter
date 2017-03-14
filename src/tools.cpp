@@ -9,7 +9,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
                               const vector<VectorXd> &ground_truth) {
 
   // Initialize
-  Eigen::VectorXd rmse(4);
+  VectorXd rmse(4);
   rmse << 0.0, 0.0, 0.0, 0.0;
 
   /* Check that estimations and groud_truth are not zero and are equal to each
@@ -17,7 +17,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
   if(estimations.size() != ground_truth.size() ||
      estimations.size() == 0 ||
      ground_truth.size() == 0){
-    std::cout << "Invalid estimation or ground_truth data" << std::endl;
+    cout << "Invalid estimation or ground_truth data" << endl;
     return rmse;
   }
 
