@@ -13,6 +13,7 @@ FusionEKF::FusionEKF() {
   is_initialized_ = false;
 
   previous_timestamp_ = 0;
+  dt = 0;
 
   // initializing matrices
   R_laser_ = MatrixXd(2, 2);
@@ -20,10 +21,10 @@ FusionEKF::FusionEKF() {
   H_laser_ = MatrixXd(2, 4);
   Hj_ = MatrixXd(3, 4);
 
-  /**
-  TODO:
-    * Finish initializing the FusionEKF.
-  */
+  // process noise characteristics
+  S_ax = 0.0;
+  S_ay = 0.0;
+
 }
 
 /**
@@ -62,17 +63,28 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     is_initialized_ = true;
     return;
   }
-
   /*****************************************************************************
-   *  Prediction
-   ****************************************************************************/
+  *  Prediction
+  ****************************************************************************/
 
-  /**
-   TODO:
-     * Update the state transition matrix F according to the new elapsed time.
-      - Time is measured in seconds.
-     * Update the process noise covariance matrix.
-   */
+  /*
+  Update the state transition matrix F according to the new elapsed time.
+  - Time is measured in seconds.
+  Update the process noise covariance matrix.
+  */
+
+  dt = (measurement_pack.timestamp_ - previous_timestamp_); // Assumed seconds
+  previous_timestamp_ = measurement_pack.timestamp_;
+  ekf.F_(0, 2) = dt;
+  ekf.F_(1, 3) = dt;
+  ekf_.Q_(0, 0) = pow(dt, 4) * S_ax / 4;
+  ekf_.Q_(0, 2) = pow(dt, 3) * S_ax / 2;
+  ekf_.Q_(1, 1) = pow(dt, 4) * S_ay;
+  ekf_.Q_(1, 3) = pow(dt, 3) * S_ay / 2;
+  ekf_.Q_(2, 0) = pow(dt, 3) * S_ax / 2;
+  ekf_.Q_(2, 2) = pow(dt, 2) * S_ax;
+  ekf_.Q_(3, 1) = pow(dt, 3) * S_ay / 2;
+  ekf_.Q_(3, 3) = pow(dt, 2) * S_ay;
 
   ekf_.Predict();
 
@@ -80,16 +92,17 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    *  Update
    ****************************************************************************/
 
-  /**
-   TODO:
-     * Use the sensor type to perform the update step.
-     * Update the state and covariance matrices.
-   */
+  /*
+  Use the sensor type to perform the update step.
+  Update the state and covariance matrices.
+  */
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
+    ekf_.UpdateEKF(measurement_pack.raw_measurements_);
   } else {
     // Laser updates
+    ekf_.Update(measurement_pack.raw_measurements_);
   }
 
   // print the output

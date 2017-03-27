@@ -40,12 +40,20 @@ private:
   // previous timestamp
   long previous_timestamp_;
 
+  // elapsed time
+  long dt_;
+
   // tool object used to compute Jacobian and RMSE
   Tools tools;
   MatrixXd R_laser_;
   MatrixXd R_radar_;
   MatrixXd H_laser_;
   MatrixXd Hj_;
+
+  // Process noise using constant acceleration
+  long S_ax; // Variance of longitudinal acceleration
+  long S_ay; // Variance of lateral acceleration
+
 };
 
 #endif /* FusionEKF_H_ */
