@@ -45,8 +45,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     */
     // first measurement
     cout << "EKF: " << endl;
-    ekf_.x_ = VectorXd(4);
-    ekf_.x_ << 1, 1, 1, 1;
+    kf_.x_ = VectorXd(4);
+    kf_.x_ << 1, 1, 1, 1;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
@@ -75,18 +75,18 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   dt = (measurement_pack.timestamp_ - previous_timestamp_); // Assumed seconds
   previous_timestamp_ = measurement_pack.timestamp_;
-  ekf.F_(0, 2) = dt;
-  ekf.F_(1, 3) = dt;
-  ekf_.Q_(0, 0) = pow(dt, 4) * S_ax / 4;
-  ekf_.Q_(0, 2) = pow(dt, 3) * S_ax / 2;
-  ekf_.Q_(1, 1) = pow(dt, 4) * S_ay;
-  ekf_.Q_(1, 3) = pow(dt, 3) * S_ay / 2;
-  ekf_.Q_(2, 0) = pow(dt, 3) * S_ax / 2;
-  ekf_.Q_(2, 2) = pow(dt, 2) * S_ax;
-  ekf_.Q_(3, 1) = pow(dt, 3) * S_ay / 2;
-  ekf_.Q_(3, 3) = pow(dt, 2) * S_ay;
+  kf_.F_(0, 2) = dt;
+  kf_.F_(1, 3) = dt;
+  kf_.Q_(0, 0) = pow(dt, 4) * S_ax / 4;
+  kf_.Q_(0, 2) = pow(dt, 3) * S_ax / 2;
+  kf_.Q_(1, 1) = pow(dt, 4) * S_ay;
+  kf_.Q_(1, 3) = pow(dt, 3) * S_ay / 2;
+  kf_.Q_(2, 0) = pow(dt, 3) * S_ax / 2;
+  kf_.Q_(2, 2) = pow(dt, 2) * S_ax;
+  kf_.Q_(3, 1) = pow(dt, 3) * S_ay / 2;
+  kf_.Q_(3, 3) = pow(dt, 2) * S_ay;
 
-  ekf_.Predict();
+  kf_.Predict();
 
   /*****************************************************************************
    *  Update
@@ -99,13 +99,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
-    ekf_.UpdateEKF(measurement_pack.raw_measurements_);
+    kf_.UpdateEKF(measurement_pack.raw_measurements_);
   } else {
     // Laser updates
-    ekf_.Update(measurement_pack.raw_measurements_);
+    kf_.Update(measurement_pack.raw_measurements_);
   }
 
   // print the output
-  cout << "x_ = " << ekf_.x_ << endl;
-  cout << "P_ = " << ekf_.P_ << endl;
+  cout << "x_ = " << kf_.x_ << endl;
+  cout << "P_ = " << kf_.P_ << endl;
 }
