@@ -13,7 +13,7 @@ SensorFusion::SensorFusion() {
   is_initialized_ = false;
 
   previous_timestamp_ = 0;
-  dt = 0;
+  dt_ = 0;
 
   // initializing matrices
   R_laser_ = MatrixXd(2, 2);
@@ -73,18 +73,18 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
   Update the process noise covariance matrix.
   */
 
-  dt = (measurement_pack.timestamp_ - previous_timestamp_); // Assumed seconds
+  dt_ = (measurement_pack.timestamp_ - previous_timestamp_); // Assumed seconds
   previous_timestamp_ = measurement_pack.timestamp_;
-  kf_.F_(0, 2) = dt;
-  kf_.F_(1, 3) = dt;
-  kf_.Q_(0, 0) = pow(dt, 4) * S_ax / 4;
-  kf_.Q_(0, 2) = pow(dt, 3) * S_ax / 2;
-  kf_.Q_(1, 1) = pow(dt, 4) * S_ay;
-  kf_.Q_(1, 3) = pow(dt, 3) * S_ay / 2;
-  kf_.Q_(2, 0) = pow(dt, 3) * S_ax / 2;
-  kf_.Q_(2, 2) = pow(dt, 2) * S_ax;
-  kf_.Q_(3, 1) = pow(dt, 3) * S_ay / 2;
-  kf_.Q_(3, 3) = pow(dt, 2) * S_ay;
+  kf_.F_(0, 2) = dt_;
+  kf_.F_(1, 3) = dt_;
+  kf_.Q_(0, 0) = pow(dt_, 4) * S_ax / 4;
+  kf_.Q_(0, 2) = pow(dt_, 3) * S_ax / 2;
+  kf_.Q_(1, 1) = pow(dt_, 4) * S_ay;
+  kf_.Q_(1, 3) = pow(dt_, 3) * S_ay / 2;
+  kf_.Q_(2, 0) = pow(dt_, 3) * S_ax / 2;
+  kf_.Q_(2, 2) = pow(dt_, 2) * S_ax;
+  kf_.Q_(3, 1) = pow(dt_, 3) * S_ay / 2;
+  kf_.Q_(3, 3) = pow(dt_, 2) * S_ay;
 
   kf_.Predict();
 
@@ -99,7 +99,7 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
-    kf_.UpdateEKF(measurement_pack.raw_measurements_);
+    kf_.Update(measurement_pack.raw_measurements_);
   } else {
     // Laser updates
     kf_.Update(measurement_pack.raw_measurements_);
