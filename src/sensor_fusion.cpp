@@ -13,13 +13,20 @@ using namespace Eigen;
 SensorFusion::SensorFusion() {
   is_initialized_ = false;
 
-  previous_timestamp_ = 0;
-  dt_ = 0;
-
   // initializing matrices
   R_laser_ = MatrixXd(2, 2);
+  R_laser_ << 1, 0,
+              0, 1;
+
   R_radar_ = MatrixXd(3, 3);
+  R_radar_ << 1, 0, 0,
+              0, 1, 0,
+              0, 0, 1;
+
   H_laser_ = MatrixXd(2, 4);
+  H_laser_ << 1, 0, 0, 0,
+              0, 1, 0, 0;
+
   Hj_ = MatrixXd(3, 4);
 
   // process noise characteristics
@@ -45,6 +52,16 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
          0, 1, 0, 0,
          0, 0, 1, 0,
          0, 0, 0, 1;
+    MatrixXd P = MatrixXd(4, 4);
+    P << 1e4, 1e4, 1e4, 1e4,
+         1e4, 1e4, 1e4, 1e4,
+         1e4, 1e4, 1e4, 1e4,
+         1e4, 1e4, 1e4, 1e4;
+    MatrixXd Q = MatrixXd(4, 4);
+    Q << 0, 0, 0, 0,
+         0, 0, 0, 0,
+         0, 0, 0, 0,
+         0, 0, 0, 0;
 
     // Decide how to initialize depending on what type of measurement we have
     if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
@@ -57,9 +74,9 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
     else if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       x_measurement = VectorXd(3);
       x_measurement << measurement_pack.raw_measurements_;
-      float rho = x(0);
-      float phi = x(1);
-      float rho_dot = x(2);
+      float rho = x_measurement(0);
+      float phi = x_measurement(1);
+      float rho_dot = x_measurement(2);
       float px = rho * sin(phi);
       float py = rho * cos(phi);
       float vx = rho_dot * sin(phi);
@@ -67,7 +84,9 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
       x << px, py, vx, vy;
     }
 
-    kf_.Initialize(x, F); // Perform initiliaziation of kf object
+
+    kf_.Initialize(x, F, P, Q); // Perform initiliaziation of kf object
+    previous_timestamp_ = measurement_pack.timestamp_;
     is_initialized_ = true;
     return;
   }
@@ -91,6 +110,9 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
   kf_.Q_(3, 1) = pow(dt_, 3) * S_ay / 2;
   kf_.Q_(3, 3) = pow(dt_, 2) * S_ay;
 
+  cout << "kf_.F_ =" << endl << kf_.F_ << endl;
+  cout << "kf_.Q_ =" << endl << kf_.Q_ << endl;
+
   kf_.Predict();
 
   /*****************************************************************************
@@ -98,17 +120,20 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
    ****************************************************************************/
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar H, R matrices
-    kf_.H_ = H_laser_;
-    kf_.R_ = R_laser_;
-  } else {
-    // Laser H, R matrices
+    Hj_ = tools.CalculateJacobian(kf_.x_);
     kf_.H_ = Hj_;
     kf_.R_ = R_radar_;
+  } else {
+    // Laser H, R matrices
+    kf_.H_ = H_laser_;
+    kf_.R_ = R_laser_;
   }
 
+  cout << "kf_.H_ =" << endl << kf_.H_ << endl;
+  cout << "kf_.R_ =" << endl << kf_.R_ << endl;
   kf_.Update(measurement_pack.raw_measurements_);
 
   // print the output
-  cout << "x_ = " << kf_.x_ << endl;
-  cout << "P_ = " << kf_.P_ << endl;
+  cout << "x_ = " << endl << kf_.x_ << endl;
+  cout << "P_ = " << endl << kf_.P_ << endl;
 }

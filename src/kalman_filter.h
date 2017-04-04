@@ -24,7 +24,7 @@ public:
    */
   virtual ~KalmanFilter();
 
-  void Initialize(VectorXd &x, MatrixXd &F);
+  void Initialize(VectorXd &x, MatrixXd &F, MatrixXd &P, MatrixXd &Q);
 
   /**
    * Prediction Predicts the state and the state covariance
