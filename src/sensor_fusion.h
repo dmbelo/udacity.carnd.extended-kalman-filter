@@ -48,7 +48,6 @@ private:
   MatrixXd R_laser_;
   MatrixXd R_radar_;
   MatrixXd H_laser_;
-  MatrixXd Hj_;
 
   // Process noise using constant acceleration
   long S_ax; // Variance of longitudinal acceleration

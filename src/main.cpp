@@ -11,61 +11,6 @@
 using namespace std;
 using namespace Eigen;
 
-// int main(){
-//   KalmanFilter kf;
-//   VectorXd z(2);
-//   z << 0.0, 0.0;
-//
-//   /*
-//    * State vector:
-//    * Px - Pedestrian x displacement
-//    * Py - Pedestrian y displacement
-//    * Vx - Pedestrian x velocity
-//    * Vy - Pedestrian y velocity
-//    */
-//   kf.x_ = VectorXd(4);
-//   kf.x_ << 0, 0, 1, 0;
-//
-//   /*
-//    * State transition matrix:
-//    * Describes how the state estimate for the next step is related to the
-//    * previous step
-//    */
-//   kf.F_ = MatrixXd(4, 4);
-//   kf.F_ << 1, 0, 1, 0,
-//            0, 1, 0, 1,
-//            0, 0, 1, 0,
-//            0, 0, 0, 1;
-//
-//   /*
-//    * State covariance matrix:
-//    *
-//    */
-//   kf.P_ = MatrixXd(4, 4);
-//   kf.P_ << 1, 1, 1, 1,
-//            1, 1, 1, 1,
-//            1, 1, 1, 1,
-//            1, 1, 1, 1;
-//
-//
-//   kf.Q_ = MatrixXd(4, 4);
-//   kf.Q_ << 1, 1, 1, 1,
-//            1, 1, 1, 1,
-//            1, 1, 1, 1,
-//            1, 1, 1, 1;
-//   kf.H_ = MatrixXd(2, 4);
-//   kf.H_ << 1, 1, 1, 1,
-//            1, 1, 1, 1;
-//   kf.R_ = MatrixXd(2, 2);
-//   kf.R_ << 1, 1,
-//            1, 1;
-//
-//   cout << "Prediction step:" << endl;
-//   kf.Predict();
-//   cout << "Update step:" << endl;
-//   kf.Update(z);
-// }
-
 void check_arguments(int argc, char* argv[]) {
   string usage_instructions = "Usage instructions: ";
   usage_instructions += argv[0];
@@ -177,7 +122,7 @@ int main(int argc, char* argv[]) {
   }
 
   // Create a Fusion EKF instance
-  SensorFusion sensorFusion;
+  SensorFusion sf;
 
   // used to compute the RMSE later
   vector<VectorXd> estimations;
@@ -186,15 +131,16 @@ int main(int argc, char* argv[]) {
   //Call the EKF-based fusion
   size_t N = measurement_pack_list.size();
   for (size_t k = 0; k < N; ++k) {
+  // for (size_t k = 0; k < 10; ++k) {
     // start filtering from the second frame (the speed is unknown in the first
     // frame)
-    sensorFusion.ProcessMeasurement(measurement_pack_list[k]);
+    sf.ProcessMeasurement(measurement_pack_list[k]);
 
     // output the estimation
-    out_file_ << sensorFusion.kf_.x_(0) << "\t";
-    out_file_ << sensorFusion.kf_.x_(1) << "\t";
-    out_file_ << sensorFusion.kf_.x_(2) << "\t";
-    out_file_ << sensorFusion.kf_.x_(3) << "\t";
+    out_file_ << sf.kf_.x_(0) << "\t";
+    out_file_ << sf.kf_.x_(1) << "\t";
+    out_file_ << sf.kf_.x_(2) << "\t";
+    out_file_ << sf.kf_.x_(3) << "\t";
 
     // output the measurements
     if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::LASER) {
@@ -215,7 +161,7 @@ int main(int argc, char* argv[]) {
     out_file_ << gt_pack_list[k].gt_values_(2) << "\t";
     out_file_ << gt_pack_list[k].gt_values_(3) << "\n";
 
-    estimations.push_back(sensorFusion.kf_.x_);
+    estimations.push_back(sf.kf_.x_);
     ground_truth.push_back(gt_pack_list[k].gt_values_);
   }
 
