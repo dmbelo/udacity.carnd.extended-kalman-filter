@@ -6,10 +6,10 @@ using namespace Eigen;
 
 class KalmanFilter {
 public:
-  
+
   VectorXd x_; // state vector
-  MatrixXd P_; // state covariance matrix
   MatrixXd F_; // state transistion matrix
+  MatrixXd P_; // state covariance matrix
   MatrixXd Q_; // process covariance matrix
   MatrixXd H_; // measurement matrix
   MatrixXd R_; // measurement covariance matrix
@@ -23,6 +23,8 @@ public:
    * Destructor
    */
   virtual ~KalmanFilter();
+
+  void Initialize(VectorXd &x, MatrixXd &F);
 
   /**
    * Prediction Predicts the state and the state covariance

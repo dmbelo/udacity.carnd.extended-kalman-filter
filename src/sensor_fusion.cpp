@@ -2,6 +2,7 @@
 #include "tools.h"
 #include "Eigen/Dense"
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 using namespace Eigen;
@@ -27,9 +28,9 @@ SensorFusion::SensorFusion() {
 
 }
 
-/**
-* Destructor.
-*/
+/*
+ * Destructor.
+ */
 SensorFusion::~SensorFusion() {}
 
 void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
@@ -37,44 +38,48 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
    *  Initialization
    ****************************************************************************/
   if (!is_initialized_) {
-    /**
-    TODO:
-      * Initialize the state ekf_.x_ with the first measurement.
-      * Create the covariance matrix.
-      * Remember: you'll need to convert radar from polar to cartesian coordinates.
-    */
-    // first measurement
-    cout << "EKF: " << endl;
-    kf_.x_ = VectorXd(4);
-    kf_.x_ << 1, 1, 1, 1;
+    VectorXd x_measurement, x;
+    x = VectorXd(4);
+    MatrixXd F = MatrixXd(4, 4);
+    F << 1, 0, 0, 0,
+         0, 1, 0, 0,
+         0, 0, 1, 0,
+         0, 0, 0, 1;
 
-    if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      /**
-      Convert radar from polar to cartesian coordinates and initialize state.
-      */
+    // Decide how to initialize depending on what type of measurement we have
+    if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
+      x_measurement = VectorXd(2);
+      x_measurement << measurement_pack.raw_measurements_;
+      float px = x_measurement(0);
+      float py = x_measurement(1);
+      x << px, py, 0, 0; // Assuming starting at 0 velocity
     }
-    else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
-      /**
-      Initialize state.
-      */
+    else if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+      x_measurement = VectorXd(3);
+      x_measurement << measurement_pack.raw_measurements_;
+      float rho = x(0);
+      float phi = x(1);
+      float rho_dot = x(2);
+      float px = rho * sin(phi);
+      float py = rho * cos(phi);
+      float vx = rho_dot * sin(phi);
+      float vy = rho_dot * cos(phi);
+      x << px, py, vx, vy;
     }
 
-    // done initializing, no need to predict or update
+    kf_.Initialize(x, F); // Perform initiliaziation of kf object
     is_initialized_ = true;
     return;
   }
+
   /*****************************************************************************
   *  Prediction
   ****************************************************************************/
-
-  /*
-  Update the state transition matrix F according to the new elapsed time.
-  - Time is measured in seconds.
-  Update the process noise covariance matrix.
-  */
-
+  // Calculate elapsed time
   dt_ = (measurement_pack.timestamp_ - previous_timestamp_); // Assumed seconds
   previous_timestamp_ = measurement_pack.timestamp_;
+
+  // Update the F, Q matrices given elapsed time
   kf_.F_(0, 2) = dt_;
   kf_.F_(1, 3) = dt_;
   kf_.Q_(0, 0) = pow(dt_, 4) * S_ax / 4;
@@ -91,19 +96,17 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
   /*****************************************************************************
    *  Update
    ****************************************************************************/
-
-  /*
-  Use the sensor type to perform the update step.
-  Update the state and covariance matrices.
-  */
-
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-    // Radar updates
-    kf_.Update(measurement_pack.raw_measurements_);
+    // Radar H, R matrices
+    kf_.H_ = H_laser_;
+    kf_.R_ = R_laser_;
   } else {
-    // Laser updates
-    kf_.Update(measurement_pack.raw_measurements_);
+    // Laser H, R matrices
+    kf_.H_ = Hj_;
+    kf_.R_ = R_radar_;
   }
+
+  kf_.Update(measurement_pack.raw_measurements_);
 
   // print the output
   cout << "x_ = " << kf_.x_ << endl;
