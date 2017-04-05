@@ -15,13 +15,13 @@ SensorFusion::SensorFusion() {
 
   // initializing matrices
   R_laser_ = MatrixXd(2, 2);
-  R_laser_ << 1, 0,
-              0, 1;
+  R_laser_ << 0.05, 0,
+              0, 0.05;
 
   R_radar_ = MatrixXd(3, 3);
-  R_radar_ << 1e7, 0, 0,
-              0, 1e7, 0,
-              0, 0, 1e7;
+  R_radar_ << 0.1, 0, 0,
+              0, 1, 0,
+              0, 0, 0.1;
 
   H_laser_ = MatrixXd(2, 4);
   H_laser_ << 1, 0, 0, 0,

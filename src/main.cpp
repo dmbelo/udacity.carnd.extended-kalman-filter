@@ -91,25 +91,24 @@ int main(int argc, char* argv[]) {
       measurement_pack_list.push_back(meas_package);
     }
 
-    // else if (sensor_type.compare("R") == 0) {
-    //   // RADAR MEASUREMENT
-    //
-    //   // read measurements at this timestamp
-    //   meas_package.sensor_type_ = MeasurementPackage::RADAR;
-    //   meas_package.raw_measurements_ = VectorXd(3);
-    //   float rho;
-    //   float phi;
-    //   float rho_dot;
-    //   iss >> rho;
-    //   iss >> phi;
-    //   iss >> rho_dot;
-    //   meas_package.raw_measurements_ << rho, phi, rho_dot;
-    //   iss >> timestamp;
-    //   meas_package.timestamp_ = timestamp;
-    //   measurement_pack_list.push_back(meas_package);
-    // }
+    else if (sensor_type.compare("R") == 0) {
+      // RADAR MEASUREMENT
 
-    if (sensor_type.compare("L") == 0) {
+      // read measurements at this timestamp
+      meas_package.sensor_type_ = MeasurementPackage::RADAR;
+      meas_package.raw_measurements_ = VectorXd(3);
+      float rho;
+      float phi;
+      float rho_dot;
+      iss >> rho;
+      iss >> phi;
+      iss >> rho_dot;
+      meas_package.raw_measurements_ << rho, phi, rho_dot;
+      iss >> timestamp;
+      meas_package.timestamp_ = timestamp;
+      measurement_pack_list.push_back(meas_package);
+    }
+
     // read ground truth data to compare later
     float x_gt;
     float y_gt;
@@ -122,7 +121,7 @@ int main(int argc, char* argv[]) {
     gt_package.gt_values_ = VectorXd(4);
     gt_package.gt_values_ << x_gt, y_gt, vx_gt, vy_gt;
     gt_pack_list.push_back(gt_package);
-  }
+    
   }
 
   // Create a Fusion EKF instance
