@@ -1,4 +1,5 @@
 #include "kalman_filter.h"
+#include <iostream>
 
 using namespace std;
 
@@ -20,9 +21,8 @@ void KalmanFilter::Predict() {
   P_ = F_ * P_ * F_.transpose() + Q_;
 }
 
-void KalmanFilter::Update(const VectorXd &z) {
+void KalmanFilter::Update(const VectorXd &y) {
   // State estimate update using Kalman Filter equations
-	VectorXd y = z - H_ * x_;
 	MatrixXd Ht = H_.transpose();
 	MatrixXd S = H_ * P_ * Ht + R_;
 	MatrixXd K = P_ * Ht * S.inverse();

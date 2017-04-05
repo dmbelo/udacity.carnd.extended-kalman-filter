@@ -89,24 +89,27 @@ int main(int argc, char* argv[]) {
       iss >> timestamp;
       meas_package.timestamp_ = timestamp;
       measurement_pack_list.push_back(meas_package);
-    } else if (sensor_type.compare("R") == 0) {
-      // RADAR MEASUREMENT
-
-      // read measurements at this timestamp
-      meas_package.sensor_type_ = MeasurementPackage::RADAR;
-      meas_package.raw_measurements_ = VectorXd(3);
-      float rho;
-      float phi;
-      float rho_dot;
-      iss >> rho;
-      iss >> phi;
-      iss >> rho_dot;
-      meas_package.raw_measurements_ << rho, phi, rho_dot;
-      iss >> timestamp;
-      meas_package.timestamp_ = timestamp;
-      measurement_pack_list.push_back(meas_package);
     }
 
+    // else if (sensor_type.compare("R") == 0) {
+    //   // RADAR MEASUREMENT
+    //
+    //   // read measurements at this timestamp
+    //   meas_package.sensor_type_ = MeasurementPackage::RADAR;
+    //   meas_package.raw_measurements_ = VectorXd(3);
+    //   float rho;
+    //   float phi;
+    //   float rho_dot;
+    //   iss >> rho;
+    //   iss >> phi;
+    //   iss >> rho_dot;
+    //   meas_package.raw_measurements_ << rho, phi, rho_dot;
+    //   iss >> timestamp;
+    //   meas_package.timestamp_ = timestamp;
+    //   measurement_pack_list.push_back(meas_package);
+    // }
+
+    if (sensor_type.compare("L") == 0) {
     // read ground truth data to compare later
     float x_gt;
     float y_gt;
@@ -120,6 +123,7 @@ int main(int argc, char* argv[]) {
     gt_package.gt_values_ << x_gt, y_gt, vx_gt, vy_gt;
     gt_pack_list.push_back(gt_package);
   }
+  }
 
   // Create a Fusion EKF instance
   SensorFusion sf;
@@ -131,9 +135,10 @@ int main(int argc, char* argv[]) {
   //Call the EKF-based fusion
   size_t N = measurement_pack_list.size();
   for (size_t k = 0; k < N; ++k) {
-  // for (size_t k = 0; k < 10; ++k) {
+  // for (size_t k = 0; k < 20; ++k) {
     // start filtering from the second frame (the speed is unknown in the first
     // frame)
+
     sf.ProcessMeasurement(measurement_pack_list[k]);
 
     // output the estimation
@@ -163,6 +168,7 @@ int main(int argc, char* argv[]) {
 
     estimations.push_back(sf.kf_.x_);
     ground_truth.push_back(gt_pack_list[k].gt_values_);
+
   }
 
   // compute the accuracy (RMSE)

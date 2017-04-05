@@ -38,10 +38,10 @@ private:
   bool is_initialized_;
 
   // previous timestamp
-  long previous_timestamp_;
+  double previous_timestamp_;
 
   // elapsed time
-  long dt_;
+  double dt_;
 
   // tool object used to compute Jacobian and RMSE
   Tools tools;
@@ -50,8 +50,8 @@ private:
   MatrixXd H_laser_;
 
   // Process noise using constant acceleration
-  long S_ax; // Variance of longitudinal acceleration
-  long S_ay; // Variance of lateral acceleration
+  double S_ax; // Variance of longitudinal acceleration
+  double S_ay; // Variance of lateral acceleration
 
 };
 
