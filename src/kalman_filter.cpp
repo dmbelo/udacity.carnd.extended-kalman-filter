@@ -25,8 +25,6 @@ void KalmanFilter::Update(const VectorXd &y) {
   // State estimate update using Kalman Filter equations
 	MatrixXd Ht = H_.transpose();
 	MatrixXd S = H_ * P_ * Ht + R_;
-  // cout << H_ << endl;
-  // cout << S.inverse() << endl;
 	MatrixXd K = P_ * Ht * S.inverse();
 
   long x_size = x_.size();

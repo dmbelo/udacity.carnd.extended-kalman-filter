@@ -13,21 +13,21 @@ SensorFusion::SensorFusion() {
 
   // initializing matrices
   R_laser_ = MatrixXd(2, 2);
-  R_laser_ << 0.008, 0,
-              0, 0.008;
+  R_laser_ << 0.006, 0,
+              0, 0.006;
 
   R_radar_ = MatrixXd(3, 3);
-  R_radar_ << 0.01, 0, 0,
-              0, 0.1, 0,
-              0, 0, 0.01;
+  R_radar_ << 0.001, 0, 0,
+              0, 0.001, 0,
+              0, 0, 0.001;
 
   H_laser_ = MatrixXd(2, 4);
   H_laser_ << 1, 0, 0, 0,
               0, 1, 0, 0;
 
   // process noise characteristics
-  S_ax = 3;
-  S_ay = 3;
+  S_ax = 2;
+  S_ay = 2;
 
 }
 
@@ -70,8 +70,6 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
     previous_timestamp_ = measurement_pack.timestamp_;
     is_initialized_ = true;
 
-    cout << kf_.x_ << endl << endl;
-
     return;
 
   }
@@ -83,8 +81,6 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
   dt_ = (measurement_pack.timestamp_ - previous_timestamp_)/1000000.0; // Assumed seconds
 
   previous_timestamp_ = measurement_pack.timestamp_;
-
-  cout << kf_.x_ << endl << endl;
 
   // Update the F, Q matrices given elapsed time
   kf_.F_ << 1, 0, dt_, 0,
@@ -131,11 +127,7 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
     VectorXd z_pred(3);
     z_pred << rho_pred, phi_pred, rhodot_pred;
     y = measurement_pack.raw_measurements_ - z_pred;
-    cout << "Pre-update" << endl << endl;
-    cout << kf_.x_ << endl << endl;
     kf_.Update(y);
-    cout << "Post-update" << endl;
-    cout << kf_.x_ << endl << endl;
 
   }
   else {
