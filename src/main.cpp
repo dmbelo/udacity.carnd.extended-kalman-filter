@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
     MeasurementPackage meas_package;
     GroundTruthPackage gt_package;
     istringstream iss(line);
-    long timestamp;
+    double timestamp;
 
     // reads first element from the current line
     iss >> sensor_type;
@@ -81,8 +81,8 @@ int main(int argc, char* argv[]) {
       // read measurements at this timestamp
       meas_package.sensor_type_ = MeasurementPackage::LASER; // TODO How does this work?
       meas_package.raw_measurements_ = VectorXd(2);
-      float x;
-      float y;
+      double x;
+      double y;
       iss >> x;
       iss >> y;
       meas_package.raw_measurements_ << x, y;
@@ -97,9 +97,9 @@ int main(int argc, char* argv[]) {
       // read measurements at this timestamp
       meas_package.sensor_type_ = MeasurementPackage::RADAR;
       meas_package.raw_measurements_ = VectorXd(3);
-      float rho;
-      float phi;
-      float rho_dot;
+      double rho;
+      double phi;
+      double rho_dot;
       iss >> rho;
       iss >> phi;
       iss >> rho_dot;
@@ -110,10 +110,10 @@ int main(int argc, char* argv[]) {
     }
 
     // read ground truth data to compare later
-    float x_gt;
-    float y_gt;
-    float vx_gt;
-    float vy_gt;
+    double x_gt;
+    double y_gt;
+    double vx_gt;
+    double vy_gt;
     iss >> x_gt;
     iss >> y_gt;
     iss >> vx_gt;
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
     gt_package.gt_values_ = VectorXd(4);
     gt_package.gt_values_ << x_gt, y_gt, vx_gt, vy_gt;
     gt_pack_list.push_back(gt_package);
-    
+
   }
 
   // Create a Fusion EKF instance
@@ -133,8 +133,8 @@ int main(int argc, char* argv[]) {
 
   //Call the EKF-based fusion
   size_t N = measurement_pack_list.size();
-  for (size_t k = 0; k < N; ++k) {
-  // for (size_t k = 0; k < 20; ++k) {
+  // for (size_t k = 0; k < N; ++k) {
+  for (size_t k = 0; k < 20; ++k) {
     // start filtering from the second frame (the speed is unknown in the first
     // frame)
 
@@ -153,8 +153,8 @@ int main(int argc, char* argv[]) {
       out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t";
     } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
       // output the estimation in the cartesian coordinates
-      float rho = measurement_pack_list[k].raw_measurements_(0);
-      float phi = measurement_pack_list[k].raw_measurements_(1);
+      double rho = measurement_pack_list[k].raw_measurements_(0);
+      double phi = measurement_pack_list[k].raw_measurements_(1);
       out_file_ << rho * cos(phi) << "\t"; // p1_meas
       out_file_ << rho * sin(phi) << "\t"; // ps_meas
     }
@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
 
   // compute the accuracy (RMSE)
   Tools tools;
-  cout << "Accuracy - RMSE:" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
+  cout << "RMSE" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
 
   // close files
   if (out_file_.is_open()) {

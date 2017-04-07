@@ -2,6 +2,7 @@
 #include "tools.h"
 #include "Eigen/Dense"
 #include <math.h>
+#include <iostream>
 
 using namespace std;
 using namespace Eigen;
@@ -69,6 +70,8 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
     previous_timestamp_ = measurement_pack.timestamp_;
     is_initialized_ = true;
 
+    cout << kf_.x_ << endl << endl;
+
     return;
 
   }
@@ -80,6 +83,8 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
   dt_ = (measurement_pack.timestamp_ - previous_timestamp_)/1000000.0; // Assumed seconds
 
   previous_timestamp_ = measurement_pack.timestamp_;
+
+  cout << kf_.x_ << endl << endl;
 
   // Update the F, Q matrices given elapsed time
   kf_.F_ << 1, 0, dt_, 0,
@@ -126,7 +131,11 @@ void SensorFusion::ProcessMeasurement(const MeasurementPackage &measurement_pack
     VectorXd z_pred(3);
     z_pred << rho_pred, phi_pred, rhodot_pred;
     y = measurement_pack.raw_measurements_ - z_pred;
+    cout << "Pre-update" << endl << endl;
+    cout << kf_.x_ << endl << endl;
     kf_.Update(y);
+    cout << "Post-update" << endl;
+    cout << kf_.x_ << endl << endl;
 
   }
   else {
