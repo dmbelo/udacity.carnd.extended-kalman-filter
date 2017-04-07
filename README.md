@@ -15,12 +15,15 @@ cmake .. && make
 
 # Results
 
-Root Mean Square Error
+### Figure 8
+![Figure 8](img/figure-eight.png)
+
+### Double Hump
+![Double Hump](img/double-hump.png)
+
+### Root Mean Square Error
 
 |Test Input|X-Position|Y-Position|X-Velocity|Y-Velocity|
-|---|---|---|---|
+|---|---|---|---|---|
 |Figure 8|0.0752665|0.0747091|0.484197|0.532599|
 |Double Hump|0.180892|0.189185|0.439929|0.837125|
-
-![](img/figure-eight.png)
-![](img/double-hump.png)
