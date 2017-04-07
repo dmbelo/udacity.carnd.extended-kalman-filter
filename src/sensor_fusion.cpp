@@ -12,21 +12,21 @@ SensorFusion::SensorFusion() {
 
   // initializing matrices
   R_laser_ = MatrixXd(2, 2);
-  R_laser_ << 0.05, 0,
-              0, 0.05;
+  R_laser_ << 0.008, 0,
+              0, 0.008;
 
   R_radar_ = MatrixXd(3, 3);
-  R_radar_ << 0.1, 0, 0,
-              0, 1, 0,
-              0, 0, 0.1;
+  R_radar_ << 0.01, 0, 0,
+              0, 0.1, 0,
+              0, 0, 0.01;
 
   H_laser_ = MatrixXd(2, 4);
   H_laser_ << 1, 0, 0, 0,
               0, 1, 0, 0;
 
   // process noise characteristics
-  S_ax = 9;
-  S_ay = 9;
+  S_ax = 3;
+  S_ay = 3;
 
 }
 
